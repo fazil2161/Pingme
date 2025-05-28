@@ -1,15 +1,15 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# dependencies
+# React-specific build output
+/build
+
+# React-specific testing
+/coverage
+
+# React-specific dependencies (relative paths)
 /node_modules
 /.pnp
 .pnp.js
-
-# testing
-/coverage
-
-# production
-/build
 
 # misc
 .DS_Store
