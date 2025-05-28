@@ -60,7 +60,7 @@ const Layout = ({ children }) => {
 
   const handleLogout = async () => {
     await logout();
-    navigate('/');
+    // Don't redirect here - let the authentication system handle it
   };
 
   return (
@@ -101,7 +101,11 @@ const Layout = ({ children }) => {
           
           {/* Mobile user menu */}
           <div className="border-t border-gray-200 dark:border-gray-700 p-4">
-            <div className="flex items-center mb-4">
+            <Link 
+              to={`/profile/${user?._id}`}
+              className="flex items-center mb-4 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
               <img
                 src={user?.profilePicture}
                 alt={user?.username}
@@ -115,7 +119,7 @@ const Layout = ({ children }) => {
                   {user?.email}
                 </p>
               </div>
-            </div>
+            </Link>
             
             <div className="space-y-2">
               <button
@@ -175,7 +179,10 @@ const Layout = ({ children }) => {
 
             {/* User menu */}
             <div className="border-t border-gray-200 dark:border-gray-700 p-4">
-              <div className="flex items-center mb-4">
+              <Link 
+                to={`/profile/${user?._id}`}
+                className="flex items-center mb-4 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              >
                 <img
                   src={user?.profilePicture}
                   alt={user?.username}
@@ -189,7 +196,7 @@ const Layout = ({ children }) => {
                     {user?.email}
                   </p>
                 </div>
-              </div>
+              </Link>
               
               <div className="space-y-2">
                 <button
