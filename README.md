@@ -286,20 +286,96 @@ npm test
 
 ## 🚀 Deployment
 
-### Backend Deployment (Heroku)
-1. Create a Heroku app
-2. Set environment variables
-3. Deploy using Git or GitHub integration
+### Development - Running Both Server and Client
 
-### Frontend Deployment (Vercel)
-1. Connect your GitHub repository
-2. Configure build settings
-3. Deploy automatically on push
+To run both the server and client from a single command:
 
-### Database (MongoDB Atlas)
+```bash
+# Install all dependencies
+npm run install-all
+
+# Start both server and client concurrently
+npm run dev
+# or alternatively
+npm run start:both
+```
+
+This will start:
+- Backend server on `http://localhost:5000`
+- Frontend client on `http://localhost:3000`
+
+### Production Deployment on Render (Single Web Service)
+
+This application is configured to deploy as a single web service on Render, where the Express server serves both the API and the built React client.
+
+#### Option 1: Using render.yaml (Recommended)
+
+1. Fork/clone this repository
+2. Connect your GitHub repository to Render
+3. The `render.yaml` file will automatically configure the deployment
+4. Set the following environment variables in Render dashboard:
+   - `MONGO_URI` - Your MongoDB connection string
+   - `JWT_SECRET` - A secure secret for JWT tokens
+   - `NODE_ENV` - Set to `production`
+
+#### Option 2: Manual Setup
+
+1. Create a new Web Service on Render
+2. Connect your GitHub repository
+3. Configure the following settings:
+   - **Build Command**: `npm run build`
+   - **Start Command**: `npm start`
+   - **Node Version**: 18 or higher
+4. Set environment variables as mentioned above
+
+#### How it works in Production
+
+- The build process installs dependencies for both server and client
+- The client React app is built with `REACT_APP_API_URL=/api` 
+- The Express server serves the built React files for all non-API routes
+- API routes are available at `/api/*`
+- The entire application runs on a single port
+
+### Alternative Deployment Options
+
+#### Backend Deployment (Railway/Heroku)
+1. Create an account on Railway or Heroku
+2. Connect your repository
+3. Set environment variables
+4. Deploy using Git integration
+
+#### Frontend Deployment (Vercel/Netlify)
+1. Build the client with development API URL
+2. Connect your GitHub repository
+3. Configure build settings
+4. Deploy automatically on push
+
+#### Database (MongoDB Atlas)
 1. Create a MongoDB Atlas cluster
-2. Configure network access
+2. Configure network access (allow all IPs for Render: 0.0.0.0/0)
 3. Update MONGO_URI in environment variables
+
+### Environment Variables
+
+Create a `.env` file in the server directory with:
+
+```env
+# Database
+MONGO_URI=mongodb+srv://username:password@cluster.mongodb.net/pingme
+
+# JWT
+JWT_SECRET=your-super-secure-jwt-secret-key
+JWT_REFRESH_SECRET=your-super-secure-refresh-secret-key
+
+# Server
+PORT=5000
+NODE_ENV=production
+
+# Optional: File uploads (for cloud storage)
+CLOUDINARY_CLOUD_NAME=your-cloudinary-name
+CLOUDINARY_API_KEY=your-api-key
+CLOUDINARY_API_SECRET=your-api-secret
+```
 
 ## 🤝 Contributing
 

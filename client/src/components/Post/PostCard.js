@@ -11,22 +11,26 @@ import {
 import { HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid';
 import { formatDate, formatNumber, linkifyText, copyToClipboard } from '../../utils';
 import api from '../../services/api';
+import ConfirmationModal from '../UI/ConfirmationModal';
 
 const PostCard = ({ post, onPostUpdate, onPostDelete }) => {
-  // Guard against invalid post data
-  if (!post || !post.author || !post._id) {
-    console.warn('PostCard received invalid post data:', post);
-    return null;
-  }
-
-  const [isLiked, setIsLiked] = useState(post.isLiked || false);
-  const [likesCount, setLikesCount] = useState(post.likes?.length || 0);
+  // All hooks must be called before any early returns
+  const [isLiked, setIsLiked] = useState(post?.isLiked || false);
+  const [likesCount, setLikesCount] = useState(post?.likes?.length || 0);
   const [showComments, setShowComments] = useState(false);
   const [newComment, setNewComment] = useState('');
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const { user } = useAuth();
   const { showToast } = useToast();
+
+  // Guard against invalid post data - now after all hooks
+  if (!post || !post.author || !post._id) {
+    console.warn('PostCard received invalid post data:', post);
+    return null;
+  }
 
   const handleLike = async () => {
     try {
@@ -79,13 +83,16 @@ const PostCard = ({ post, onPostUpdate, onPostDelete }) => {
     }
   };
 
-  const handleDelete = async () => {
-    if (!window.confirm('Are you sure you want to delete this post?')) {
-      return;
-    }
+  const handleDeleteClick = () => {
+    setShowMenu(false);
+    setShowDeleteModal(true);
+  };
 
+  const handleDeleteConfirm = async () => {
+    setIsDeleting(true);
     try {
       await api.delete(`/posts/${post._id}`);
+      setShowDeleteModal(false);
       showToast('Post deleted successfully!', 'success');
       
       if (onPostDelete) {
@@ -94,7 +101,13 @@ const PostCard = ({ post, onPostUpdate, onPostDelete }) => {
     } catch (error) {
       console.error('Error deleting post:', error);
       showToast('Failed to delete post', 'error');
+    } finally {
+      setIsDeleting(false);
     }
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeleteModal(false);
   };
 
   const isOwnPost = post.author._id === user?._id;
@@ -144,7 +157,7 @@ const PostCard = ({ post, onPostUpdate, onPostDelete }) => {
                 </button>
                 {isOwnPost && (
                   <button
-                    onClick={handleDelete}
+                    onClick={handleDeleteClick}
                     className="block w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700"
                   >
                     Delete post
@@ -273,6 +286,19 @@ const PostCard = ({ post, onPostUpdate, onPostDelete }) => {
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Post"
+        message="Are you sure you want to delete this post? This action cannot be undone."
+        confirmText={isDeleting ? "Deleting..." : "Delete"}
+        cancelText="Cancel"
+        type="danger"
+        isLoading={isDeleting}
+      />
     </div>
   );
 };

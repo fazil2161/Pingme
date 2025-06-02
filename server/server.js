@@ -6,6 +6,7 @@ const compression = require('compression');
 const rateLimit = require('express-rate-limit');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
+const path = require('path');
 require('dotenv').config();
 
 // Import routes
@@ -38,6 +39,13 @@ const corsOptions = {
       allowedOrigins.push(...process.env.ALLOWED_ORIGINS.split(',').map(url => url.trim()));
     }
     
+    // In production, allow the deployed domain
+    if (process.env.NODE_ENV === 'production') {
+      // Allow same origin requests in production
+      callback(null, true);
+      return;
+    }
+    
     if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
@@ -58,7 +66,8 @@ const io = new Server(server, {
 
 // Security middleware
 app.use(helmet({
-  crossOriginResourcePolicy: { policy: "cross-origin" }
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+  contentSecurityPolicy: process.env.NODE_ENV === 'production' ? undefined : false
 }));
 app.use(compression());
 
@@ -90,13 +99,19 @@ app.use((req, res, next) => {
 // Static files for uploads
 app.use('/uploads', express.static('uploads'));
 
+// Serve static files from React build in production
+if (process.env.NODE_ENV === 'production') {
+  // Serve static files from the React app build directory
+  app.use(express.static(path.join(__dirname, '../client/build')));
+}
+
 // Make io available in routes
 app.use((req, res, next) => {
   req.io = io;
   next();
 });
 
-// Routes
+// API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/posts', postRoutes);
@@ -108,6 +123,7 @@ app.get('/api/health', (req, res) => {
     message: 'PingMe Server is running!', 
     timestamp: new Date().toISOString(),
     cors: 'enabled',
+    environment: process.env.NODE_ENV || 'development',
     endpoints: {
       auth: '/api/auth/*',
       users: '/api/users/*',
@@ -135,10 +151,17 @@ app.use((err, req, res, next) => {
   });
 });
 
-// 404 handler
-app.use('*', (req, res) => {
-  res.status(404).json({ message: 'Route not found' });
-});
+// Serve React app for all non-API routes in production
+if (process.env.NODE_ENV === 'production') {
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
+  });
+} else {
+  // 404 handler for development
+  app.use('*', (req, res) => {
+    res.status(404).json({ message: 'Route not found' });
+  });
+}
 
 // Database connection
 const connectDB = async () => {
@@ -163,7 +186,11 @@ const startServer = async () => {
     server.listen(PORT, () => {
       console.log(`🚀 PingMe Server running on port ${PORT}`);
       console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
-      console.log(`🌐 CORS enabled for: http://localhost:3000`);
+      if (process.env.NODE_ENV === 'production') {
+        console.log(`🌐 Serving React app from build directory`);
+      } else {
+        console.log(`🌐 CORS enabled for: http://localhost:3000`);
+      }
       console.log(`📡 API available at: http://localhost:${PORT}/api`);
       console.log(`💚 Health check: http://localhost:${PORT}/api/health`);
     });

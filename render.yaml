@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: pingme
+    runtime: node
+    plan: free
+    buildCommand: npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        fromService:
+          type: web
+          name: pingme
+          property: port
+    healthCheckPath: /api/health 

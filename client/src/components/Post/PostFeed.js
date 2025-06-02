@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, forwardRef, useImperativeHandle } from 'react';
 import { useToast } from '../../context/ToastContext';
 import PostCard from './PostCard';
 import useInfiniteScroll from '../../hooks/useInfiniteScroll';
 import api from '../../services/api';
 
-const PostFeed = ({ feedType = 'home', userId = null, hashtag = null }) => {
+const PostFeed = forwardRef(({ feedType = 'home', userId = null, hashtag = null }, ref) => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [hasMore, setHasMore] = useState(true);
@@ -79,9 +79,14 @@ const PostFeed = ({ feedType = 'home', userId = null, hashtag = null }) => {
     setPosts(prev => prev.filter(post => post._id !== postId));
   };
 
-  const handleNewPost = (newPost) => {
+  const handleNewPost = useCallback((newPost) => {
     setPosts(prev => [newPost, ...prev]);
-  };
+  }, []);
+
+  // Expose handleNewPost function to parent components
+  useImperativeHandle(ref, () => ({
+    handleNewPost
+  }), [handleNewPost]);
 
   if (loading && posts.length === 0) {
     return (
@@ -160,6 +165,6 @@ const PostFeed = ({ feedType = 'home', userId = null, hashtag = null }) => {
       )}
     </div>
   );
-};
+});
 
 export default PostFeed; 

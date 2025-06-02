@@ -14,7 +14,11 @@ export const SocketProvider = ({ children }) => {
   useEffect(() => {
     if (user && token) {
       // Connect to socket
-      const newSocket = io(process.env.REACT_APP_SERVER_URL || 'http://localhost:5000', {
+      // In production, use same origin (empty string), in development use localhost:5000
+      const socketUrl = process.env.REACT_APP_SERVER_URL || 
+                       (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:5000');
+      
+      const newSocket = io(socketUrl, {
         auth: {
           token
         }
