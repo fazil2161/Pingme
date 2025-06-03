@@ -8,13 +8,15 @@
     "start:both": "concurrently \"npm run server\" \"npm run client\"",
     "server": "cd server && npm run dev",
     "client": "cd client && npm start",
-    "build": "npm run install-all && cd client && npm run build",
-    "build:alt": "npm run install-all && cd client && REACT_APP_API_URL=/api npm run build:dev",
+    "debug": "node debug-build.js",
+    "build": "node build-script.js",
+    "build:simple": "node build-simple.js",
+    "build:direct": "npm install && cd server && npm install && cd ../client && npm install && npm run build:prod",
+    "build:original": "npm install && cd server && npm install && cd ../client && npm install && npm run build",
     "install-server": "cd server && npm install",
     "install-client": "cd client && npm install",
     "install-all": "npm run install-server && npm run install-client",
     "start": "cd server && npm start",
-    "build:render": "npm run install-all && cd client && npm run build",
     "heroku-postbuild": "npm run build"
   },
   "keywords": [
