@@ -9,6 +9,7 @@
     "server": "cd server && npm run dev",
     "client": "cd client && npm start",
     "build": "npm run install-all && cd client && npm run build",
+    "build:alt": "npm run install-all && cd client && REACT_APP_API_URL=/api npm run build:dev",
     "install-server": "cd server && npm install",
     "install-client": "cd client && npm install",
     "install-all": "npm run install-server && npm run install-client",
