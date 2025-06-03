@@ -95,8 +95,7 @@ userSchema.virtual('postsCount', {
 });
 
 // Indexes for better performance
-userSchema.index({ username: 1 });
-userSchema.index({ email: 1 });
+// Note: username and email indexes are automatically created due to unique: true
 userSchema.index({ followers: 1 });
 userSchema.index({ following: 1 });
 userSchema.index({ createdAt: -1 });
