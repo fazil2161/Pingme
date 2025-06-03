@@ -173,12 +173,20 @@ export const AuthProvider = ({ children }) => {
   // Update user profile
   const updateUser = async (userData) => {
     try {
+      console.log('updateUser called with:', userData);
+      
       const formData = new FormData();
       Object.keys(userData).forEach(key => {
         if (userData[key] !== null && userData[key] !== undefined) {
+          console.log(`Appending ${key}:`, userData[key]);
           formData.append(key, userData[key]);
         }
       });
+
+      console.log('FormData contents:');
+      for (let pair of formData.entries()) {
+        console.log(pair[0] + ': ' + pair[1]);
+      }
 
       const response = await api.put('/users/profile', formData, {
         headers: {
@@ -194,6 +202,7 @@ export const AuthProvider = ({ children }) => {
       showToast('Profile updated successfully!', 'success');
       return { success: true };
     } catch (error) {
+      console.error('Update user error:', error);
       const message = error.response?.data?.message || 'Failed to update profile';
       showToast(message, 'error');
       return { success: false, message };
