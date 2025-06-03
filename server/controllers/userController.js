@@ -62,6 +62,11 @@ const getUserProfile = async (req, res) => {
 // @access  Private
 const updateProfile = async (req, res) => {
   try {
+    console.log('=== PROFILE UPDATE DEBUG ===');
+    console.log('Request body:', req.body);
+    console.log('Request file:', req.file);
+    console.log('Current user:', req.user.username);
+
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({
@@ -88,8 +93,26 @@ const updateProfile = async (req, res) => {
     // Handle profile picture upload
     let profilePicture = req.user.profilePicture;
     if (req.file) {
-      const baseUrl = process.env.SERVER_URL || 'http://localhost:5000';
+      console.log('File details:', {
+        filename: req.file.filename,
+        originalname: req.file.originalname,
+        size: req.file.size,
+        path: req.file.path
+      });
+      
+      // Construct the profile picture URL
+      let baseUrl = process.env.SERVER_URL;
+      if (!baseUrl) {
+        // Construct base URL from request if SERVER_URL is not set
+        const protocol = req.protocol;
+        const host = req.get('host');
+        baseUrl = `${protocol}://${host}`;
+      }
+      
       profilePicture = `${baseUrl}/uploads/profile-pics/${req.file.filename}`;
+      console.log('New profile picture URL:', profilePicture);
+    } else {
+      console.log('No file uploaded, keeping existing profile picture:', profilePicture);
     }
 
     // Update user profile
@@ -101,11 +124,16 @@ const updateProfile = async (req, res) => {
       profilePicture
     };
 
+    console.log('Update data being sent to database:', updateData);
+
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       updateData,
       { new: true, runValidators: true }
     );
+
+    console.log('Database update result - profilePicture:', updatedUser.profilePicture);
+    console.log('=== END DEBUG ===');
 
     res.status(200).json({
       success: true,
