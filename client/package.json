@@ -22,7 +22,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "cross-env REACT_APP_API_URL=/api react-scripts build",
+    "build": "react-scripts build",
     "build:prod": "cross-env REACT_APP_API_URL=/api react-scripts build",
     "build:dev": "react-scripts build",
     "test": "react-scripts test",
