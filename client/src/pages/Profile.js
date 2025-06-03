@@ -97,12 +97,12 @@ const Profile = () => {
     setShowEditModal(true);
   };
 
-  const handleProfileUpdate = (updatedData) => {
-    // Update the profile user data with the new information
+  const handleProfileUpdate = async (updatedUserData) => {
+    // Update the profile user data with the complete user information from server
     setProfileUser(prev => ({
       ...prev,
-      ...updatedData,
-      // Keep the follower/following counts as they are
+      ...updatedUserData,
+      // Keep the counts that might not be in the update response
       followersCount: prev.followersCount,
       followingCount: prev.followingCount,
       postsCount: prev.postsCount

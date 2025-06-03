@@ -131,8 +131,9 @@ const EditProfile = ({ isOpen, onClose, user, onUserUpdate }) => {
       const result = await updateUser(updateData);
       
       if (result.success) {
-        if (onUserUpdate) {
-          onUserUpdate(updateData);
+        if (onUserUpdate && result.user) {
+          // Pass the updated user data from the server response
+          onUserUpdate(result.user);
         }
         onClose();
       }

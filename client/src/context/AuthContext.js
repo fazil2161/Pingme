@@ -170,23 +170,30 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Refresh user data
+  const refreshUser = async () => {
+    try {
+      const response = await api.get('/auth/me');
+      dispatch({
+        type: 'UPDATE_USER',
+        payload: response.data.data.user
+      });
+      return { success: true, user: response.data.data.user };
+    } catch (error) {
+      console.error('Error refreshing user:', error);
+      return { success: false };
+    }
+  };
+
   // Update user profile
   const updateUser = async (userData) => {
     try {
-      console.log('updateUser called with:', userData);
-      
       const formData = new FormData();
       Object.keys(userData).forEach(key => {
         if (userData[key] !== null && userData[key] !== undefined) {
-          console.log(`Appending ${key}:`, userData[key]);
           formData.append(key, userData[key]);
         }
       });
-
-      console.log('FormData contents:');
-      for (let pair of formData.entries()) {
-        console.log(pair[0] + ': ' + pair[1]);
-      }
 
       const response = await api.put('/users/profile', formData, {
         headers: {
@@ -194,13 +201,14 @@ export const AuthProvider = ({ children }) => {
         }
       });
 
+      // Update local user state with the response data
       dispatch({
         type: 'UPDATE_USER',
         payload: response.data.data.user
       });
 
       showToast('Profile updated successfully!', 'success');
-      return { success: true };
+      return { success: true, user: response.data.data.user };
     } catch (error) {
       console.error('Update user error:', error);
       const message = error.response?.data?.message || 'Failed to update profile';
@@ -215,6 +223,7 @@ export const AuthProvider = ({ children }) => {
     register,
     logout,
     updateUser,
+    refreshUser,
     dispatch
   };
 

@@ -62,16 +62,8 @@ const getUserProfile = async (req, res) => {
 // @access  Private
 const updateProfile = async (req, res) => {
   try {
-    // Debug logs
-    console.log('Update profile request received');
-    console.log('req.body:', req.body);
-    console.log('req.file:', req.file);
-    console.log('req.files:', req.files);
-    console.log('req.user:', req.user.username);
-
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      console.log('Validation errors:', errors.array());
       return res.status(400).json({
         success: false,
         message: 'Validation failed',
@@ -96,12 +88,8 @@ const updateProfile = async (req, res) => {
     // Handle profile picture upload
     let profilePicture = req.user.profilePicture;
     if (req.file) {
-      console.log('File uploaded:', req.file.filename);
       const baseUrl = process.env.SERVER_URL || 'http://localhost:5000';
       profilePicture = `${baseUrl}/uploads/profile-pics/${req.file.filename}`;
-      console.log('New profile picture URL:', profilePicture);
-    } else {
-      console.log('No file uploaded, keeping existing profile picture');
     }
 
     // Update user profile
@@ -113,15 +101,11 @@ const updateProfile = async (req, res) => {
       profilePicture
     };
 
-    console.log('Update data:', updateData);
-
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       updateData,
       { new: true, runValidators: true }
     );
-
-    console.log('User updated successfully:', updatedUser.username);
 
     res.status(200).json({
       success: true,
