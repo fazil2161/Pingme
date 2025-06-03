@@ -36,8 +36,17 @@ const updateProfileValidation = [
     .withMessage('Location cannot exceed 100 characters'),
   body('website')
     .optional()
-    .isURL()
-    .withMessage('Please provide a valid website URL')
+    .custom((value) => {
+      if (!value || value.trim() === '') {
+        return true; // Allow empty values
+      }
+      // Only validate URL format if value is provided
+      const urlRegex = /^https?:\/\/.+/;
+      if (!urlRegex.test(value)) {
+        throw new Error('Please provide a valid website URL starting with http:// or https://');
+      }
+      return true;
+    })
     .isLength({ max: 200 })
     .withMessage('Website URL cannot exceed 200 characters')
 ];
